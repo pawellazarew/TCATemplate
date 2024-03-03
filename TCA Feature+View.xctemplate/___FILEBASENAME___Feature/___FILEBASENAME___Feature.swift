@@ -5,9 +5,11 @@
 import Foundation
 import ComposableArchitecture
 
-public struct ___VARIABLE_productName___Feature: Reducer {
+@Reducer
+public struct ___VARIABLE_productName___Feature {
     public init() {}
     
+    @ObservableState
     public struct State: Equatable {
         public init() {}
     }

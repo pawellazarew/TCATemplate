@@ -15,7 +15,8 @@ enum Constants {
 
     enum File {
         static let templateNames = ["TCA Feature.xctemplate", "TCA Feature+View.xctemplate"]
-        static let destinationRelativePath = "/Platforms/iPhoneOS.platform/Developer/Library/Xcode/Templates/Project Templates/iOS/Application"
+        static let templatesPath = "/Platforms/iPhoneOS.platform/Developer/Library/Xcode/Templates"
+        static let destinationRelativePaths = ["/Project Templates/iOS/Application", "/Project Templates/iOS/Framework & Library", "/File Templates/iOS/Source"]
     }
 
     enum Messages {
@@ -38,15 +39,14 @@ func printToConsole(_ message: Any) {
 }
 
 func moveTemplate(templateName: String, destinationPath: String, fileManager: FileManager) throws {
-    if !fileManager.fileExists(atPath: "\(destinationPath)/\(templateName)") {
-        try fileManager.copyItem(atPath: templateName, toPath: "\(destinationPath)/\(templateName)")
+    if fileManager.fileExists(atPath: "\(destinationPath)/\(templateName)") {
+        try replaceItemAt(URL(fileURLWithPath: "\(destinationPath)/\(templateName)"), withItemAt: URL(fileURLWithPath: templateName), fileManager: fileManager)
     } else {
-        try replaceItemAt(URL(fileURLWithPath: "\(destinationPath)/\(templateName)"), withItemAt: URL(fileURLWithPath: templateName))
+        try fileManager.copyItem(atPath: templateName, toPath: "\(destinationPath)/\(templateName)")
     }
 }
 
-func replaceItemAt(_ url: URL, withItemAt itemAtUrl: URL) throws {
-    let fileManager = FileManager.default
+func replaceItemAt(_ url: URL, withItemAt itemAtUrl: URL, fileManager: FileManager) throws {
     try fileManager.removeItem(at: url)
     try fileManager.copyItem(atPath: itemAtUrl.path, toPath: url.path)
 }
@@ -77,14 +77,17 @@ func bash(command: String, arguments: [String]) -> String {
 
 func run() {
     let fileManager = FileManager.default
-    let destinationPath = bash(command: "xcode-select", arguments: ["--print-path"]).appending(Constants.File.destinationRelativePath)
+    let xcodeDestinationPath = bash(command: "xcode-select", arguments: ["--print-path"]).appending(Constants.File.templatesPath)
     
     for templateName in Constants.File.templateNames {
-        do {
-            try moveTemplate(templateName: templateName, destinationPath: destinationPath, fileManager: fileManager)
-        } catch let error as NSError {
-            printToConsole("\(Constants.Messages.errorMessage) : \(error.localizedFailureReason!)")
-            return
+        for path in Constants.File.destinationRelativePaths {
+            let destinationPath = xcodeDestinationPath.appending(path)
+            do {
+                try moveTemplate(templateName: templateName, destinationPath: destinationPath, fileManager: fileManager)
+            } catch let error as NSError {
+                printToConsole("\(Constants.Messages.errorMessage) path: \(destinationPath) : \(error.localizedFailureReason!)")
+                return
+            }
         }
     }
     printToConsole(Constants.Messages.successMessage)

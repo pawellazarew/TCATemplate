@@ -5,7 +5,7 @@
 import SwiftUI
 import ComposableArchitecture
 
-public struct ___VARIABLE_productName___View: View {
+public struct ___VARIABLE_productName___FeatureView: View {
     private let store: StoreOf<___VARIABLE_productName___Feature>
     
     public init(store: StoreOf<___VARIABLE_productName___Feature>) {
@@ -18,7 +18,7 @@ public struct ___VARIABLE_productName___View: View {
 }
 
 #Preview {
-    ___VARIABLE_productName___View(
+    ___VARIABLE_productName___FeatureView(
         store: .init(
             initialState: .init(),
             reducer: ___VARIABLE_productName___Feature.init
